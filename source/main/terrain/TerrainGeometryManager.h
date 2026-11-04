@@ -49,6 +49,10 @@ public:
 
     Ogre::Vector3 getNormalAt(float x, float y, float z);
 
+    // [FloydPrecision] double-precision versions: steady ground height far from the map origin
+    double getHeightAtPrecise(double x, double z);
+    Ogre::Vector3 getNormalAtPrecise(double x, double y, double z);
+
     Ogre::Vector3 getMaxTerrainSize();
 
     bool isFlat() { return mIsFlat; };

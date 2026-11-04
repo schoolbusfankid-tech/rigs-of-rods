@@ -64,6 +64,7 @@ public:
     /// @{
     bool                    isFlat();
     float                   getHeightAt(float x, float z);
+    double                  getHeightAtPrecise(double x, double z); // [FloydPrecision]
     Ogre::Vector3           getSpawnPos();
     Ogre::Degree            getSpawnRot();
     /// @}
@@ -100,6 +101,7 @@ public:
     void                    setGravity(float value);
     float                   getGravity() const            { return m_cur_gravity; }
     Ogre::Vector3           GetNormalAt(float x, float y, float z);
+    Ogre::Vector3           GetNormalAtPrecise(double x, double y, double z); // [FloydPrecision]
     Ogre::Vector3           getMaxTerrainSize();
     Ogre::AxisAlignedBox    getTerrainCollisionAAB();
     /// @}

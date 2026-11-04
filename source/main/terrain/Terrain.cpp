@@ -519,6 +519,16 @@ Ogre::Vector3 RoR::Terrain::GetNormalAt(float x, float y, float z)
     return m_geometry_manager->getNormalAt(x, y, z);
 }
 
+double RoR::Terrain::getHeightAtPrecise(double x, double z) // [FloydPrecision]
+{
+    return m_geometry_manager->getHeightAtPrecise(x, z);
+}
+
+Ogre::Vector3 RoR::Terrain::GetNormalAtPrecise(double x, double y, double z) // [FloydPrecision]
+{
+    return m_geometry_manager->getNormalAtPrecise(x, y, z);
+}
+
 SkyManager* RoR::Terrain::getSkyManager()
 {
     return m_sky_manager;

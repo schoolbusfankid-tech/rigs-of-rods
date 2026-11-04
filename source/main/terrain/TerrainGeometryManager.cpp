@@ -231,24 +231,72 @@ float TerrainGeometryManager::getHeightAtTerrainPosition(Real x, Real y)
 
 float TerrainGeometryManager::getHeightAt(float x, float z)
 {
+    // [FloydPrecision] the original single-precision lookup (getHeightAtTerrainPosition) loses
+    // ~0.5 mm far from the map origin, which made vehicles shake on big maps. Same triangles, computed in double.
+    return static_cast<float>(this->getHeightAtPrecise(x, z));
+}
+
+double TerrainGeometryManager::getHeightAtPrecise(double x, double z)
+{
     if (m_spec->is_flat)
-        return 0.0f;
+        return 0.0;
 
-    float tx = (x - mBase - mPos.x) / ((mSize - 1) *  mScale);
-    float ty = (z + mBase - mPos.z) / ((mSize - 1) * -mScale);
+    const double cells = static_cast<double>(mSize - 1);
+    const double tx = (x - static_cast<double>(mBase) - static_cast<double>(mPos.x)) / (cells *  static_cast<double>(mScale));
+    const double ty = (z + static_cast<double>(mBase) - static_cast<double>(mPos.z)) / (cells * -static_cast<double>(mScale));
 
-    if (tx <= 0.0f || ty <= 0.0f || tx >= 1.0f || ty >= 1.0f)
+    if (tx <= 0.0 || ty <= 0.0 || tx >= 1.0 || ty >= 1.0)
         return terrainManager->GetDef()->water_bottom_height;
     else if (mIsFlat)
         return mMinHeight;
 
-    return getHeightAtTerrainPosition(tx, ty);
+    // position in heightmap cells; the cell's local coordinates are small, so no precision is lost
+    const double fx = tx * cells, fy = ty * cells;
+    long startX = static_cast<long>(fx);
+    long startY = static_cast<long>(fy);
+    if (startX > mSize - 2) startX = mSize - 2;
+    if (startY > mSize - 2) startY = mSize - 2;
+    const long endX = startX + 1, endY = startY + 1;
+    const double xp = fx - startX, yp = fy - startY;
+
+    const double h0 = mHeightData[startY * mSize + startX];
+    const double h1 = mHeightData[startY * mSize + endX];
+    const double h2 = mHeightData[endY   * mSize + endX];
+    const double h3 = mHeightData[endY   * mSize + startX];
+
+    /* Same triangle split as getHeightAtTerrainPosition (Ogre):
+    even     odd
+    3---2   3---2
+    | / |   | \ |
+    0---1   0---1
+    */
+    if (startY % 2)
+    {
+        if ((1.0 - yp) > xp)                                   // tri 0-1-3
+            return h0 + (h1 - h0) * xp + (h3 - h0) * yp;
+        else                                                   // tri 1-2-3
+            return h2 + (h2 - h3) * (xp - 1.0) + (h2 - h1) * (yp - 1.0);
+    }
+    else
+    {
+        if (yp > xp)                                           // tri 0-2-3
+            return h0 + (h2 - h3) * xp + (h3 - h0) * yp;
+        else                                                   // tri 0-1-2
+            return h0 + (h1 - h0) * xp + (h2 - h1) * yp;
+    }
 }
 
 Ogre::Vector3 TerrainGeometryManager::getNormalAt(float x, float y, float z)
 {
-    const float precision = 0.1f;
-    Vector3 normal(getHeightAt(x - precision, z) - y, precision, y - getHeightAt(x, z + precision));
+    return this->getNormalAtPrecise(x, y, z);
+}
+
+Ogre::Vector3 TerrainGeometryManager::getNormalAtPrecise(double x, double y, double z)
+{
+    const double precision = 0.1;
+    Vector3 normal(static_cast<float>(getHeightAtPrecise(x - precision, z) - y),
+                   static_cast<float>(precision),
+                   static_cast<float>(y - getHeightAtPrecise(x, z + precision)));
     normal.normalise();
     return normal;
 }
