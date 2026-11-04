@@ -1611,8 +1611,13 @@ void Actor::CalcNodes()
         if (!ar_nodes[i].nd_no_ground_contact)
         {
             Vector3 oripos = ar_nodes[i].AbsPosition;
-            bool contacted = App::GetGameContext()->GetTerrain()->GetCollisions()->groundCollision(&ar_nodes[i], PHYSICS_DT);
-            contacted = contacted | App::GetGameContext()->GetTerrain()->GetCollisions()->nodeCollision(&ar_nodes[i], PHYSICS_DT);
+            // [FloydPrecision] exact node position: actor origin + relative position, added in double
+            const double precise_pos[3] = {
+                static_cast<double>(ar_origin.x) + static_cast<double>(ar_nodes[i].RelPosition.x),
+                static_cast<double>(ar_origin.y) + static_cast<double>(ar_nodes[i].RelPosition.y),
+                static_cast<double>(ar_origin.z) + static_cast<double>(ar_nodes[i].RelPosition.z) };
+            bool contacted = App::GetGameContext()->GetTerrain()->GetCollisions()->groundCollision(&ar_nodes[i], PHYSICS_DT, precise_pos);
+            contacted = contacted | App::GetGameContext()->GetTerrain()->GetCollisions()->nodeCollision(&ar_nodes[i], PHYSICS_DT, precise_pos);
             ar_nodes[i].nd_has_ground_contact = contacted;
             if (ar_nodes[i].nd_has_ground_contact || ar_nodes[i].nd_has_mesh_contact)
             {
