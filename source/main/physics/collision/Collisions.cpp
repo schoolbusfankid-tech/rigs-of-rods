@@ -1637,3 +1637,4 @@ void Collisions::getMeshInformation(Mesh* mesh,size_t &vertex_count,Ogre::Vector
 void Collisions::finishLoadingTerrain()
 {
 }
+                
