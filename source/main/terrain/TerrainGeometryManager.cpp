@@ -740,3 +740,4 @@ Ogre::Vector3 TerrainGeometryManager::getMaxTerrainSize()
     return Vector3(m_spec->world_size_x, mMaxHeight, m_spec->world_size_z);
 }
 
+
