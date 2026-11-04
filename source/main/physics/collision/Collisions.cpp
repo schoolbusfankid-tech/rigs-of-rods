@@ -958,6 +958,12 @@ bool Collisions::permitEvent(Actor* b, CollisionEventFilter filter)
 
 bool Collisions::nodeCollision(node_t *node, float dt)
 {
+    const double pos[3] = { node->AbsPosition.x, node->AbsPosition.y, node->AbsPosition.z };
+    return this->nodeCollision(node, dt, pos);
+}
+
+bool Collisions::nodeCollision(node_t *node, float dt, const double precise_pos[3]) // [FloydPrecision]
+{
     // find the correct cell
     int refx = (int)(node->AbsPosition.x / CELL_SIZE);
     int refz = (int)(node->AbsPosition.z / CELL_SIZE);
@@ -1089,7 +1095,11 @@ bool Collisions::nodeCollision(node_t *node, float dt)
                 continue;
             // check if this tri is minimal
             // transform
-            Vector3 point = ctri->forward * (node->AbsPosition - ctri->a);
+            // [FloydPrecision] offset from the triangle corner computed in double, then it is small enough for float
+            const Vector3 rel(static_cast<float>(precise_pos[0] - ctri->a.x),
+                              static_cast<float>(precise_pos[1] - ctri->a.y),
+                              static_cast<float>(precise_pos[2] - ctri->a.z));
+            Vector3 point = ctri->forward * rel;
             // test if within tri collision volume (potential cause of bug!)
             if (point.x >= 0 && point.y >= 0 && (point.x + point.y) <= 1.0 && point.z < 0 && point.z > -0.1)
             {
@@ -1244,14 +1254,23 @@ bool Collisions::isInside(Ogre::Vector3 pos, collision_box_t *cbox, float border
 
 bool Collisions::groundCollision(node_t *node, float dt)
 {
-    Real v = App::GetGameContext()->GetTerrain()->getHeightAt(node->AbsPosition.x, node->AbsPosition.z);
-    if (v > node->AbsPosition.y)
+    const double pos[3] = { node->AbsPosition.x, node->AbsPosition.y, node->AbsPosition.z };
+    return this->groundCollision(node, dt, pos);
+}
+
+// [FloydPrecision] precise_pos = node position in double (actor origin + relative position).
+// AbsPosition is single precision and moves in steps of several millimetres far from the map origin;
+// feeding those steps into the ground contact made vehicles shake on big maps.
+bool Collisions::groundCollision(node_t *node, float dt, const double precise_pos[3])
+{
+    const double v = App::GetGameContext()->GetTerrain()->getHeightAtPrecise(precise_pos[0], precise_pos[2]);
+    if (v > precise_pos[1])
     {
         ground_model_t* ogm = landuse ? landuse->getGroundModelAt(node->AbsPosition.x, node->AbsPosition.z) : nullptr;
         // when landuse fails or we don't have it, use the default value
         if (!ogm) ogm = defaultgroundgm;
-        Ogre::Vector3 normal = App::GetGameContext()->GetTerrain()->GetNormalAt(node->AbsPosition.x, v, node->AbsPosition.z);
-        node->Forces += primitiveCollision(node, node->Velocity, node->mass, normal, dt, ogm, v - node->AbsPosition.y);
+        Ogre::Vector3 normal = App::GetGameContext()->GetTerrain()->GetNormalAtPrecise(precise_pos[0], v, precise_pos[2]);
+        node->Forces += primitiveCollision(node, node->Velocity, node->mass, normal, dt, ogm, static_cast<float>(v - precise_pos[1]));
         node->nd_last_collision_gm = ogm;
         return true;
     }
