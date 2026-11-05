@@ -96,6 +96,7 @@ public:
     float             getInitialLoadedMass() { return ar_original_load_mass; }
     int               getNodeCount() { return ar_num_nodes; }
     Ogre::Vector3     getNodePosition(int nodeNumber);     //!< Returns world position of node
+    Ogre::Vector3     getNodeRelPosition(int nodeNumber);  //!< [FloydPrecision] position relative to the actor's physics origin - differences between nodes are exact even far from the map origin
     float             getNodeInitialMass(int nodeNumber);
     float             getNodeMass(int nodeNumber);
     Ogre::Vector3     getNodeVelocity(int nodeNumber);

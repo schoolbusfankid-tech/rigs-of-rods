@@ -4687,6 +4687,13 @@ std::vector<std::string> Actor::getManagedMaterialNames()
     return names;
 }
 
+Vector3 Actor::getNodeRelPosition(int nodeNumber) // [FloydPrecision]
+{
+    if (nodeNumber >= 0 && nodeNumber < ar_num_nodes)
+        return ar_nodes[nodeNumber].RelPosition;
+    return Ogre::Vector3::ZERO;
+}
+
 Vector3 Actor::getNodePosition(int nodeNumber)
 {
     if (nodeNumber >= 0 && nodeNumber < ar_num_nodes)

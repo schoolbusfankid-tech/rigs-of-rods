@@ -140,6 +140,7 @@ void RoR::RegisterActor(asIScriptEngine *engine)
     result = engine->RegisterObjectMethod("BeamClass", "float getInitialLoadedMass()", asMETHOD(Actor, getInitialLoadedMass), asCALL_THISCALL); ROR_ASSERT(result >= 0);
     result = engine->RegisterObjectMethod("BeamClass", "int getNodeCount()", asMETHOD(Actor,getNodeCount), asCALL_THISCALL); ROR_ASSERT(result>=0);
     result = engine->RegisterObjectMethod("BeamClass", "vector3 getNodePosition(int)", asMETHOD(Actor, getNodePosition), asCALL_THISCALL); ROR_ASSERT(result>=0);
+    result = engine->RegisterObjectMethod("BeamClass", "vector3 getNodeRelPosition(int)", asMETHOD(Actor, getNodeRelPosition), asCALL_THISCALL); ROR_ASSERT(result>=0); // [FloydPrecision]
     result = engine->RegisterObjectMethod("BeamClass", "float getNodeInitialMass(int)", asMETHOD(Actor, getNodeInitialMass), asCALL_THISCALL); ROR_ASSERT(result>=0);
     result = engine->RegisterObjectMethod("BeamClass", "float getNodeMass(int)", asMETHOD(Actor, getNodeMass), asCALL_THISCALL); ROR_ASSERT(result >= 0);
     result = engine->RegisterObjectMethod("BeamClass", "vector3 getNodeVelocity(int)", asMETHOD(Actor, getNodeVelocity), asCALL_THISCALL); ROR_ASSERT(result>=0);
