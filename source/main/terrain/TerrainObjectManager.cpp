@@ -304,7 +304,8 @@ void TerrainObjectManager::ProcessTree(
     geom->setCamera(App::GetCameraManager()->GetCamera());
     geom->setPageSize(50);
     geom->setInfinite();
-    Ogre::TRect<Ogre::Real> bounds = TBounds(0, 0, mapsizex, mapsizez);
+    const Ogre::Vector3 minc = terrainManager->getGeometryManager()->getTerrainMinCorner(); // [FloydPrecision]
+    Ogre::TRect<Ogre::Real> bounds = TBounds(minc.x, minc.z, minc.x + mapsizex, minc.z + mapsizez);
     geom->setBounds(bounds);
 
     //Set up LODs
@@ -323,7 +324,7 @@ void TerrainObjectManager::ProcessTree(
         geom->addDetailLevel<ImpostorPage>(max, max / 10);
     }
 
-    TreeLoader2D *treeLoader = new TreeLoader2D(geom, TBounds(0, 0, mapsizex, mapsizez));
+    TreeLoader2D *treeLoader = new TreeLoader2D(geom, TBounds(minc.x, minc.z, minc.x + mapsizex, minc.z + mapsizez));
     treeLoader->setMinimumScale(scalefrom);
     treeLoader->setMaximumScale(scaleto);
     geom->setPageLoader(treeLoader);

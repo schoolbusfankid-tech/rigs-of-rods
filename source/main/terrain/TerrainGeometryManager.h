@@ -54,6 +54,7 @@ public:
     Ogre::Vector3 getNormalAtPrecise(double x, double y, double z);
 
     Ogre::Vector3 getMaxTerrainSize();
+    Ogre::Vector3 getTerrainMinCorner(); // [FloydPrecision] world X/Z of the terrain's lowest corner (0,0 unless OriginAtWorldCenter)
 
     bool isFlat() { return mIsFlat; };
 

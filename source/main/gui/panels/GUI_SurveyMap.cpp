@@ -456,6 +456,10 @@ void SurveyMap::CreateTerrainTextures()
     Vector3 terrain_size = App::GetGameContext()->GetTerrain()->getMaxTerrainSize();
     bool use_aab         = App::GetGameContext()->GetTerrain()->isFlat() && std::min(aab.getSize().x, aab.getSize().z) > 50.0f;
 
+    {   // [FloydPrecision] terrains centred on world zero start at a negative corner
+        const Vector3 minc = App::GetGameContext()->GetTerrain()->getTerrainMinCorner();
+        mMapCenterOffset = Vector2(minc.x, minc.z);
+    }
     if (terrain_size.isZeroLength() || use_aab && (aab.getSize().length() < terrain_size.length()))
     {
         terrain_size = aab.getSize();

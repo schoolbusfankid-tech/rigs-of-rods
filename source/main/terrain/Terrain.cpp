@@ -502,6 +502,13 @@ Ogre::AxisAlignedBox RoR::Terrain::getTerrainCollisionAAB()
     return m_collisions->getCollisionAAB();
 }
 
+Ogre::Vector3 RoR::Terrain::getTerrainMinCorner() // [FloydPrecision]
+{
+    if (!m_geometry_manager)
+        return Vector3::ZERO;
+    return m_geometry_manager->getTerrainMinCorner();
+}
+
 Ogre::Vector3 RoR::Terrain::getMaxTerrainSize()
 {
     if (!m_geometry_manager)

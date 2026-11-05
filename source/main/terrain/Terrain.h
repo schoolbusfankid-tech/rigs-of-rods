@@ -103,6 +103,7 @@ public:
     Ogre::Vector3           GetNormalAt(float x, float y, float z);
     Ogre::Vector3           GetNormalAtPrecise(double x, double y, double z); // [FloydPrecision]
     Ogre::Vector3           getMaxTerrainSize();
+    Ogre::Vector3           getTerrainMinCorner(); // [FloydPrecision]
     Ogre::AxisAlignedBox    getTerrainCollisionAAB();
     /// @}
 

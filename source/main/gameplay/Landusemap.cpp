@@ -59,6 +59,10 @@ ground_model_t* Landusemap::getGroundModelAt(int x, int z)
     if (!data)
         return nullptr;
 #ifdef USE_PAGED
+    {   // [FloydPrecision] world -> map coordinates (terrain may start at a negative corner)
+        const Ogre::Vector3 minc = App::GetGameContext()->GetTerrain()->getTerrainMinCorner();
+        x -= (int)minc.x; z -= (int)minc.z;
+    }
     // we return the default ground model if we are not anymore in this map
     if (x < 0 || x >= mapsize.x || z < 0 || z >= mapsize.z)
         return default_ground_model;

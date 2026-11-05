@@ -72,7 +72,12 @@ bool RoR::OTCParser::LoadMasterConfig(Ogre::DataStreamPtr &ds, const char* filen
         m_def->skirt_size              = cfg.getInt   ("SkirtSize",                  30);
 
         m_def->world_size = std::max(m_def->world_size_x, m_def->world_size_z);
-        m_def->origin_pos = Ogre::Vector3(m_def->world_size_x / 2.0f, 0.0f, m_def->world_size_z / 2.0f);
+        // [FloydPrecision] OriginAtWorldCenter=1: the terrain spans -size/2 .. +size/2 instead of 0 .. size, so nothing is more
+        // than half the map away from world zero (float precision - and with it vehicle/camera jitter - is ~2x-4x better).
+        if (cfg.getBool("OriginAtWorldCenter", false))
+            m_def->origin_pos = Ogre::Vector3::ZERO;
+        else
+            m_def->origin_pos = Ogre::Vector3(m_def->world_size_x / 2.0f, 0.0f, m_def->world_size_z / 2.0f);
         m_def->cache_filename_base = file_basename;
 
         for (int x = 0; x <= m_def->pages_max_x; ++x)

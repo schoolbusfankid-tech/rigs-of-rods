@@ -735,6 +735,12 @@ void TerrainGeometryManager::SetupGeometry(RoR::OTCPage& page, bool flat)
     }
 }
 
+Ogre::Vector3 TerrainGeometryManager::getTerrainMinCorner() // [FloydPrecision]
+{
+    return Ogre::Vector3(m_spec->origin_pos.x - m_spec->world_size_x / 2.0f, 0.0f,
+                         m_spec->origin_pos.z - m_spec->world_size_z / 2.0f);
+}
+
 Ogre::Vector3 TerrainGeometryManager::getMaxTerrainSize()
 {
     return Vector3(m_spec->world_size_x, mMaxHeight, m_spec->world_size_z);
