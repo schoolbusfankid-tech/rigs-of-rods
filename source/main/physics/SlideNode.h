@@ -118,6 +118,7 @@ private:
     RailSegment*   m_cur_rail_seg;        //!< Current rail segment we are sliding on
     float          m_node_forces_ratio;   //!< Ratio of length along the slide beam where the virtual node is "0.0f = p1, 1.0f = p2"
     Ogre::Vector3  m_ideal_position;      //!< Where the node SHOULD be. (World, m)
+    Ogre::Vector3  m_ideal_offset = Ogre::Vector3::ZERO; //!< [FloydPrecision] ideal position minus the sliding node's position, computed without world-coordinate rounding
     float          m_initial_threshold;   //!< Distance from beam calculating corrective forces (m)
     float          m_cur_threshold;       //!< Distance away from beam before corrective forces begin to act on the node (m)
     float          m_spring_rate;         //!< Spring rate holding node to rail (N/m)

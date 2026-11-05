@@ -1856,4 +1856,3 @@ void Actor::CalcRopes()
         }
     }
 }
-

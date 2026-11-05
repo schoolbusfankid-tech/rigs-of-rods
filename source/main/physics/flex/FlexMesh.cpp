@@ -242,37 +242,38 @@ FlexMesh::~FlexMesh()
 
 Vector3 FlexMesh::updateVertices()
 {
+    // [FloydPrecision] built from RelPosition (exact); only the returned centre is a world position
     RoR::NodeSB* all_nodes = m_gfx_actor->GetSimNodeBuffer();
-    Vector3 center = (all_nodes[m_vertex_nodes[0]].AbsPosition + all_nodes[m_vertex_nodes[1]].AbsPosition) / 2.0;
+    Vector3 center = (all_nodes[m_vertex_nodes[0]].RelPosition + all_nodes[m_vertex_nodes[1]].RelPosition) / 2.0;
 
     //optimization possible here : just copy bands on face
 
-    m_vertices[0].position=all_nodes[m_vertex_nodes[0]].AbsPosition-center;
+    m_vertices[0].position=all_nodes[m_vertex_nodes[0]].RelPosition-center;
     //normals
-    m_vertices[0].normal=approx_normalise(all_nodes[m_vertex_nodes[0]].AbsPosition-all_nodes[m_vertex_nodes[1]].AbsPosition);
+    m_vertices[0].normal=approx_normalise(all_nodes[m_vertex_nodes[0]].RelPosition-all_nodes[m_vertex_nodes[1]].RelPosition);
 
-    m_vertices[1].position=all_nodes[m_vertex_nodes[1]].AbsPosition-center;
+    m_vertices[1].position=all_nodes[m_vertex_nodes[1]].RelPosition-center;
     //normals
     m_vertices[1].normal=-m_vertices[0].normal;
 
     for (int i=0; i<m_num_rays*2; i++)
     {
-        m_vertices[2+i].position=all_nodes[m_vertex_nodes[2+i]].AbsPosition-center;
+        m_vertices[2+i].position=all_nodes[m_vertex_nodes[2+i]].RelPosition-center;
         //normals
         if ((i%2)==0)
         {
-            m_vertices[2+i].normal=approx_normalise(all_nodes[m_vertex_nodes[0]].AbsPosition-all_nodes[m_vertex_nodes[1]].AbsPosition);
+            m_vertices[2+i].normal=approx_normalise(all_nodes[m_vertex_nodes[0]].RelPosition-all_nodes[m_vertex_nodes[1]].RelPosition);
         } else
         {
             m_vertices[2+i].normal=-m_vertices[2+i-1].normal;
         }
         if (m_is_rimmed)
         {
-            m_vertices[2+4*m_num_rays+i].position=all_nodes[m_vertex_nodes[2+4*m_num_rays+i]].AbsPosition-center;
+            m_vertices[2+4*m_num_rays+i].position=all_nodes[m_vertex_nodes[2+4*m_num_rays+i]].RelPosition-center;
             //normals
             if ((i%2)==0)
             {
-                m_vertices[2+4*m_num_rays+i].normal=approx_normalise(all_nodes[m_vertex_nodes[2+4*m_num_rays+i]].AbsPosition-all_nodes[m_vertex_nodes[2+4*m_num_rays+i+1]].AbsPosition);
+                m_vertices[2+4*m_num_rays+i].normal=approx_normalise(all_nodes[m_vertex_nodes[2+4*m_num_rays+i]].RelPosition-all_nodes[m_vertex_nodes[2+4*m_num_rays+i+1]].RelPosition);
             } else
             {
                 m_vertices[2+4*m_num_rays+i].normal=-m_vertices[2+4*m_num_rays+i-1].normal;
@@ -287,7 +288,7 @@ Vector3 FlexMesh::updateVertices()
             m_vertices[2+2*m_num_rays+i].normal=approx_normalise(m_vertices[2+i].position);
         }
     }
-    return center;
+    return all_nodes[m_vertex_nodes[0]].AbsPosition + (center - all_nodes[m_vertex_nodes[0]].RelPosition);
 }
 
 void FlexMesh::flexitCompute()

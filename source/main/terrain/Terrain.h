@@ -162,4 +162,3 @@ private:
 /// @} // addtogroup Terrain
 
 } // namespace RoR
-

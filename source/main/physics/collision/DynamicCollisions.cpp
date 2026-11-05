@@ -241,7 +241,9 @@ void RoR::ResolveIntraActorCollisions(const float dt, PointColDetector &intraPoi
         if (!intraPointCD.hit_list.empty())
         {
             // setup transformation of points to triangle local coordinates
-            const Triangle triangle(na->AbsPosition, nb->AbsPosition, no->AbsPosition);
+            // [FloydPrecision] same actor = same physics origin: RelPosition is exact, AbsPosition is rounded
+            // to several millimetres far from the map origin (that rounding made vehicles shake on big maps)
+            const Triangle triangle(na->RelPosition, nb->RelPosition, no->RelPosition);
             const CartesianToTriangleTransform transform(triangle);
 
             for (PointidID_t h : intraPointCD.hit_list)
@@ -254,7 +256,7 @@ void RoR::ResolveIntraActorCollisions(const float dt, PointColDetector &intraPoi
                 if (no == &hitnode || na == &hitnode || nb == &hitnode) continue;
 
                 // transform point to triangle local coordinates
-                const auto local_point = transform(hitnode.AbsPosition);
+                const auto local_point = transform(hitnode.RelPosition);   // [FloydPrecision]
 
                 // collision test
                 const bool is_colliding = InsideTriangleTest(local_point, collrange);

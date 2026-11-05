@@ -236,4 +236,3 @@ Ogre::Vector3 primitiveCollision(node_t* node, Ogre::Vector3 velocity, float mas
 /// @} // addtogroup Physics
 
 } // namespace RoR
-

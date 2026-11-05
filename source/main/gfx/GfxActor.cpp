@@ -1790,6 +1790,7 @@ void RoR::GfxActor::UpdateSimDataBuffer()
     {
         auto node = m_actor->ar_nodes[i];
         m_simbuf.simbuf_nodes[i].AbsPosition = node.AbsPosition;
+        m_simbuf.simbuf_nodes[i].RelPosition = node.RelPosition;   // [FloydPrecision]
         m_simbuf.simbuf_nodes[i].nd_has_contact = node.nd_has_ground_contact || node.nd_has_mesh_contact;
     }
 
@@ -2320,8 +2321,10 @@ void RoR::GfxActor::UpdateProps(float dt, bool is_player_actor)
 
         // Update position and orientation
         // -- quick ugly port from `Actor::updateProps()` --- ~ 06/2018
-        Vector3 diffX = nodes[prop.pp_node_x].AbsPosition - nodes[prop.pp_node_ref].AbsPosition;
-        Vector3 diffY = nodes[prop.pp_node_y].AbsPosition - nodes[prop.pp_node_ref].AbsPosition;
+        // [FloydPrecision] node differences from RelPosition (exact); AbsPosition is rounded far from the map origin,
+        // which made props (body, dash...) wobble on big maps
+        Vector3 diffX = nodes[prop.pp_node_x].RelPosition - nodes[prop.pp_node_ref].RelPosition;
+        Vector3 diffY = nodes[prop.pp_node_y].RelPosition - nodes[prop.pp_node_ref].RelPosition;
 
         Vector3 normal = (diffY.crossProduct(diffX)).normalisedCopy();
 

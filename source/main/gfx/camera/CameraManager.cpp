@@ -212,10 +212,12 @@ void CameraManager::UpdateCurrentBehavior()
         const NodeNum_t dir_node  = m_cct_player_actor->ar_camera_node_dir [m_cct_player_actor->ar_current_cinecam];
         const NodeNum_t roll_node = m_cct_player_actor->ar_camera_node_roll[m_cct_player_actor->ar_current_cinecam];
 
-        Vector3 dir  = (m_cct_player_actor->ar_nodes[pos_node].AbsPosition
-                - m_cct_player_actor->ar_nodes[dir_node].AbsPosition).normalisedCopy();
-        Vector3 roll = (m_cct_player_actor->ar_nodes[pos_node].AbsPosition
-                - m_cct_player_actor->ar_nodes[roll_node].AbsPosition).normalisedCopy();
+        // [FloydPrecision] RelPosition differences are exact; AbsPosition ones are rounded far from the
+        // map origin, which made the in-cab camera wobble on big maps
+        Vector3 dir  = (m_cct_player_actor->ar_nodes[pos_node].RelPosition
+                - m_cct_player_actor->ar_nodes[dir_node].RelPosition).normalisedCopy();
+        Vector3 roll = (m_cct_player_actor->ar_nodes[pos_node].RelPosition
+                - m_cct_player_actor->ar_nodes[roll_node].RelPosition).normalisedCopy();
 
         if ( m_cct_player_actor->ar_camera_node_roll_inv[m_cct_player_actor->ar_current_cinecam] )
         {

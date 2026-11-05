@@ -606,4 +606,3 @@ Ogre::Vector3 RoR::Terrain::getSpawnPos() { return m_def->start_position; }
 Ogre::Degree RoR::Terrain::getSpawnRot() { return m_def->start_rotation; }
 
 float         RoR::Terrain::getWaterHeight() const { return m_def->water_height; }
-

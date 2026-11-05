@@ -67,6 +67,7 @@ namespace RoR {
 struct NodeSB
 {
     Ogre::Vector3     AbsPosition; // classic name
+    Ogre::Vector3     RelPosition; // [FloydPrecision] relative to the actor's physics origin - exact differences between nodes of one actor
     bool              nd_has_contact:1;
     bool              nd_is_wet:1;
 };

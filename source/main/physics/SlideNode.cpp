@@ -161,12 +161,25 @@ int SlideNode::GetSlideNodeId()
     return m_sliding_node->pos;
 }
 
+// [FloydPrecision] Vector from node 'a' to node 'b'. Nodes of the same actor share one physics origin,
+// so their RelPositions give the exact difference; world AbsPositions are rounded to several millimetres
+// far from the map origin, which made slide nodes (and the whole vehicle) shake on big maps.
+static Ogre::Vector3 PreciseDelta(const node_t* a, const node_t* b)
+{
+    const Ogre::Vector3 origin_a = a->AbsPosition - a->RelPosition;
+    const Ogre::Vector3 origin_b = b->AbsPosition - b->RelPosition;
+    if (origin_a.squaredDistance(origin_b) < 0.05f * 0.05f)       // same actor (same origin)
+        return b->RelPosition - a->RelPosition;
+    return b->AbsPosition - a->AbsPosition;                        // node of another actor
+}
+
 void SlideNode::UpdatePosition()
 {
     // only do calcs if we have a beam to slide on
     if (!m_sliding_beam || m_sliding_beam->bm_broken)
     {
         m_ideal_position = m_sliding_node->AbsPosition;
+        m_ideal_offset = Ogre::Vector3::ZERO;
         return;
     }
 
@@ -175,17 +188,19 @@ void SlideNode::UpdatePosition()
     m_sliding_beam = m_cur_rail_seg->rs_beam;
 
     // Get vector for beam
-    Ogre::Vector3 b = m_sliding_beam->p2->AbsPosition - m_sliding_beam->p1->AbsPosition;
+    Ogre::Vector3 b = PreciseDelta(m_sliding_beam->p1, m_sliding_beam->p2);
 
     // pre-compute normal
     const Ogre::Real bLen = b.normalise();
 
     // Get dot product along the b beam
-    const Ogre::Real aDotBUnit = (m_sliding_node->AbsPosition - m_sliding_beam->p1->AbsPosition).dotProduct(b);
+    const Ogre::Vector3 p1_to_node = PreciseDelta(m_sliding_beam->p1, m_sliding_node);
+    const Ogre::Real aDotBUnit = p1_to_node.dotProduct(b);
 
     // constrain Value between the two end points
     const Ogre::Real len = std::max(0.0f, std::min(aDotBUnit, bLen));
-    m_ideal_position = m_sliding_beam->p1->AbsPosition + b * len;
+    m_ideal_offset = b * len - p1_to_node;          // [FloydPrecision] ideal position relative to the sliding node
+    m_ideal_position = m_sliding_node->AbsPosition + m_ideal_offset;
 
     // calculate(cache) the ratio between the the two end points,
     // if bLen = 0.0f it means the beam is zero length so pick an end point
@@ -248,7 +263,7 @@ Ogre::Real SlideNode::getLenTo(const beam_t* beam) const
 
 Ogre::Vector3 SlideNode::CalcCorrectiveForces()
 {
-    Ogre::Vector3 force = (m_ideal_position - m_sliding_node->AbsPosition);
+    Ogre::Vector3 force = m_ideal_offset;   // [FloydPrecision] was (m_ideal_position - AbsPosition), rounded far from the origin
     const Ogre::Real beamLen = std::max(0.0f, force.normalise() - m_cur_threshold);
     const Ogre::Real forceLen = -m_spring_rate * beamLen;
     return (force * forceLen);

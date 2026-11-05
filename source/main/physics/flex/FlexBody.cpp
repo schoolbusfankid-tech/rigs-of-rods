@@ -622,33 +622,37 @@ void FlexBody::computeFlexbody()
     if (m_has_texture_blend) updateBlend();
 
     RoR::NodeSB* nodes = m_gfx_actor->GetSimNodeBuffer();
+    Ogre::Vector3 center_rel; // [FloydPrecision] flexbody centre relative to the actor origin
 
     // compute the local center
     if (m_node_center >= 0)
     {
-        Vector3 diffX = nodes[m_node_x].AbsPosition - nodes[m_node_center].AbsPosition;
-        Vector3 diffY = nodes[m_node_y].AbsPosition - nodes[m_node_center].AbsPosition;
+        // [FloydPrecision] node differences from RelPosition (exact, same actor)
+        Vector3 diffX = nodes[m_node_x].RelPosition - nodes[m_node_center].RelPosition;
+        Vector3 diffY = nodes[m_node_y].RelPosition - nodes[m_node_center].RelPosition;
         Ogre::Vector3 flexit_normal = fast_normalise(diffY.crossProduct(diffX));
 
-        m_flexit_center = nodes[m_node_center].AbsPosition + m_center_offset.x * diffX + m_center_offset.y * diffY;
-        m_flexit_center += m_center_offset.z * flexit_normal;
+        center_rel = nodes[m_node_center].RelPosition + m_center_offset.x * diffX + m_center_offset.y * diffY
+                   + m_center_offset.z * flexit_normal;
+        m_flexit_center = nodes[m_node_center].AbsPosition + (center_rel - nodes[m_node_center].RelPosition);
     }
     else
     {
+        center_rel = nodes[0].RelPosition;
         m_flexit_center = nodes[0].AbsPosition;
     }
 
     for (int i=0; i<(int)m_vertex_count; i++)
     {
-        Vector3 diffX = nodes[m_locators[i].nx].AbsPosition - nodes[m_locators[i].ref].AbsPosition;
-        Vector3 diffY = nodes[m_locators[i].ny].AbsPosition - nodes[m_locators[i].ref].AbsPosition;
+        Vector3 diffX = nodes[m_locators[i].nx].RelPosition - nodes[m_locators[i].ref].RelPosition;
+        Vector3 diffY = nodes[m_locators[i].ny].RelPosition - nodes[m_locators[i].ref].RelPosition;
         Vector3 nCross = fast_normalise(diffX.crossProduct(diffY)); //nCross.normalise();
 
         m_dst_pos[i].x = diffX.x * m_locators[i].coords.x + diffY.x * m_locators[i].coords.y + nCross.x * m_locators[i].coords.z;
         m_dst_pos[i].y = diffX.y * m_locators[i].coords.x + diffY.y * m_locators[i].coords.y + nCross.y * m_locators[i].coords.z;
         m_dst_pos[i].z = diffX.z * m_locators[i].coords.x + diffY.z * m_locators[i].coords.y + nCross.z * m_locators[i].coords.z;
 
-        m_dst_pos[i] += nodes[m_locators[i].ref].AbsPosition - m_flexit_center;
+        m_dst_pos[i] += nodes[m_locators[i].ref].RelPosition - center_rel;   // [FloydPrecision]
 
         m_dst_normals[i].x = diffX.x * m_src_normals[i].x + diffY.x * m_src_normals[i].y + nCross.x * m_src_normals[i].z;
         m_dst_normals[i].y = diffX.y * m_src_normals[i].x + diffY.y * m_src_normals[i].y + nCross.y * m_src_normals[i].z;
