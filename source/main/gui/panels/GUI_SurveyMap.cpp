@@ -471,6 +471,30 @@ void SurveyMap::CreateTerrainTextures()
     mTerrainSize = Vector2(terrain_size.x, terrain_size.z);
     Ogre::Vector2 mMapCenter = mTerrainSize / 2;
 
+    {   // [FloydPrecision] a terrain may ship its own overhead map image: <terrain>_survey.png (or .jpg),
+        // covering the whole terrain, north up. Used instead of the rendered top view (roads, labels...).
+        std::string tname = App::GetGameContext()->GetTerrain()->getTerrainFileName();
+        std::string tbase = tname.substr(0, tname.find_last_of('.'));
+        std::string group = App::GetGameContext()->GetTerrain()->getTerrainFileResourceGroup();
+        for (const char* ext : {"_survey.png", "_survey.jpg"})
+        {
+            std::string custom = tbase + ext;
+            if (Ogre::ResourceGroupManager::getSingleton().resourceExists(group, custom))
+            {
+                try
+                {
+                    mMapTexture = Ogre::TextureManager::getSingleton().load(custom, group);
+                    if (mMapTexture)
+                        return;
+                }
+                catch (Ogre::Exception& e)
+                {
+                    LOG("Custom survey map '" + custom + "' failed to load: " + e.getDescription());
+                }
+            }
+        }
+    }
+
     ConfigOptionMap ropts = App::GetAppContext()->GetOgreRoot()->getRenderSystem()->getConfigOptions();
     int fsaa = StringConverter::parseInt(ropts["FSAA"].currentValue, 0);
 
